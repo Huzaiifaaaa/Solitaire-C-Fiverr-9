@@ -8,6 +8,9 @@
 #define ROWS 12;
 #define HOLDROWS 2;
 
+#define MSGWIN "YOU WON!!"
+#define MSGLOOSE "YOU LOST!!"
+
 //MAIN FUNCTION
 //EXECUTION STARTS HERE
 //TAKES COMMAND LINE ARGUMENTS
@@ -44,34 +47,42 @@ void print(int rows,int holdrows,int sum,int seed){
     int leftcount=1;
     int rightcount=1;
     char input;
-
     char stars[rows];
     int right[rows+1];
     int left[rows];
     int holdright[rows];
     int holdleft[rows];
-
     int lefttemp;
     int righttemp;
     int leftremovetemp;
     int rightremovetemp;
+    int turn=rows+rows;
+    int turncounter=0;
+    int akeycounter=0;
+    int skeycounter=0;
     //DECLARING VARIBALES
 
-    for(int i=0;i<rows;i++){
+    for(int i=0;i<rows+1;i++){
         left[i]=getrandom(21,-21);//ASSIGNING RANDOM VALUES TO LEFT LIST
         right[i]=getrandom(21,-21);//ASSIGNING RANDOM VALUES TO RIGHT LIST
-        stars[i]='*';//ASSIGNING STARS TO HIDE NUMBERS
+        //stars[i]='*';//ASSIGNING STARS TO HIDE NUMBERS
     }
-    right[12]=getrandom(21,-21);
 
     for(int i=0;i<rows;i++){
+        stars[i]='*';//ASSIGNING STARS TO HIDE NUMBERS
+    }
+
+    right[12]=getrandom(21,-21);
+
+    for(int i=0;i<rows+1;i++)
+    {
         holdleft[i]=0;//ASSIGNING 0 TO LEFT HOLD COLUMN
         holdright[i]=0;//ASSIGNING 0 TO RIGHT HOLD COLUMN
     }
 
     printheader();//CALLING FUNCTION TO PRINT HEADER
     printmiddle(left,right,stars,count,rows);//CALLING FUNCTION TO PRINT MIDDLE SECTION
-    printfooter(sum);//CALLING FUNCTION TO PRINT FOOTER
+    printfooter(sum,turn,turncounter);//CALLING FUNCTION TO PRINT FOOTER
     here://GOTO STATEMENT LABEL
 
     while(1){//LOOPING INFINITE TIMES
@@ -86,6 +97,11 @@ void print(int rows,int holdrows,int sum,int seed){
         }
         else if(input=='a'|| input=='A')//IF INPUT IS 'a' OR 'A'-> SELECT LEFT COLUMN
         {
+            if(akeycounter>rows+1)
+            {
+                exit(0);
+            }
+
             lefttemp=0;//ASSIGNING VALUE
             printheader();//CALLING FUNCTION TO PRINT HEADER
 
@@ -98,16 +114,23 @@ void print(int rows,int holdrows,int sum,int seed){
 
             for(i=leftcount+1;i>0;i--)
             {
-                printf("|  %d  |    %d    | /// |   %d     |   %d  |\n",holdleft[lefttemp-1],left[i],right[i],holdright[i]);
+                printf("|  %d  |    %d    | /// |   %c     |   %d  |\n",holdleft[lefttemp-1],left[i],stars[i-1],holdright[i-1]);
                 lefttemp++;
             }
 
             sum=sum+left[leftcount];
             leftcount++;//INCREMENTING
-            printfooter(sum);//PRINTING FOOTER
+            turncounter++;//INCREMENTING
+            akeycounter++;//INCREMENTING
+            printfooter(sum,turn,turncounter);//PRINTING FOOTER
         }
         else if(input=='s'|| input=='S')//IF INPUT IS 's' OR 'S'-> SELECT RIGHT COLUMN
         {
+            if(skeycounter>rows+1)
+            {
+                exit(0);
+            }
+
             righttemp=0;//ASSIGNING VALUE
             printheader();//PRINTING HEADER
 
@@ -120,13 +143,15 @@ void print(int rows,int holdrows,int sum,int seed){
 
             for(i=rightcount+1;i>0;i--)
             {
-                printf("|  %d  |    %c    | /// |   %d     |  %d  |\n",holdleft[i],stars[i],right[i],holdright[righttemp-1]);
+                printf("|  %d  |    %c    | /// |   %d     |  %d  |\n",holdleft[i],stars[i-1],right[i],holdright[righttemp-1]);
                 righttemp++;//INCREMENTING
             }
 
             sum=sum+right[rightcount];
             rightcount++;//INCREMENTING
-            printfooter(sum);//PRINTING FOOTER
+            turncounter++;//INCREMENTING
+            skeycounter++;//INCREMENTING
+            printfooter(sum,turn,turncounter);//PRINTING FOOTER
         }
         else if(input=='q'|| input=='Q'){//IF INPUT IS 'q' OR 'Q'-> ADD CARD TO LEFT HOLD COLUMN
             leftcounter=0;//ASSIGNING VALUE
@@ -150,7 +175,8 @@ void print(int rows,int holdrows,int sum,int seed){
 
             leftholdcounter++;//INCREMENTING
             leftcount++;//INCREMENTING
-            printfooter(sum);//PRINTING FOOTER
+            turncounter++;//INCREMENTING
+            printfooter(sum,turn,turncounter);//PRINTING FOOTER
         }
         else if(input=='w'|| input=='W')//IF INPUT IS 'w' OR 'W'-> ADD CARD TO RIGHT HOLD COLUMN
         {
@@ -175,7 +201,8 @@ void print(int rows,int holdrows,int sum,int seed){
 
             rightholdcounter++;//INCREMENTING
             rightcount++;//INCREMENTING
-            printfooter(sum);//PRINTING FOOTER
+            turncounter++;//INCREMENTING
+            printfooter(sum,turn,turncounter);//PRINTING FOOTER
         }
         else if(input=='z'|| input=='Z')//IF INPUT IS 'z' OR 'Z'-> REMOVE CARD FROM LEFT HOLD COLUMN
         {
@@ -200,7 +227,7 @@ void print(int rows,int holdrows,int sum,int seed){
             }
 
             leftholdcounter--;//DECREMENTING
-            printfooter(sum);//PRINTING FOOTER
+            printfooter(sum,turn,turncounter);//PRINTING FOOTER
         }
         else if(input=='x'|| input=='X')//IF INPUT IS 'x' OR 'X'-> REMOVE CARD FROM RIGHT HOLD COLUMN
         {
@@ -225,7 +252,7 @@ void print(int rows,int holdrows,int sum,int seed){
             }
 
             rightholdcounter--;//DECREMENTING
-            printfooter(sum);//PRINTING FOOTER
+            printfooter(sum,turn,turncounter);//PRINTING FOOTER
         }
         else//IF ANY OTHER KEY IS PRESSED
         {
@@ -264,11 +291,33 @@ void printheader()
 //FUNCTION TO PRINT FOOTER
 //TAKES INT SUM AS
 //RETURNS NOTHING
-void printfooter(int sum)
+void printfooter(int sum,int turn,int turncounter)
 {
     printf("+-----+---------+-----+---------+-----+\n");
     printf("|SUM = %d                             |\n",sum);
     printf("+-----+---------+-----+---------+-----+\n");
+
+    if(sum>21 || sum<0)
+    {
+        printf(MSGLOOSE);
+        exit(0);
+    }
+
+    if(turncounter==turn)
+    {
+        if(sum>21 || sum<0)
+        {
+            printf(MSGWIN);
+            exit(0);
+        }
+        else
+        {
+            printf(MSGLOOSE);
+            exit(0);
+        }
+
+    }
+
 }//END OF FUNCTION
 
 
